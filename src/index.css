@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    background-color: #0d0d14;
+    color: #dde1f0;
+    font-family: 'Syne', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Fix white input bug on all browsers */
+  input, textarea, select {
+    background-color: #1a1a26 !important;
+    color: #dde1f0 !important;
+    color-scheme: dark;
+  }
+  input::placeholder, textarea::placeholder {
+    color: rgba(180, 185, 210, 0.38) !important;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #111119; }
+  ::-webkit-scrollbar-thumb { background: #2a2a38; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #353548; }
+}
+
+@layer utilities {
+  .card {
+    background: #15151f;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+  }
+  .input-dark {
+    background: #1a1a26 !important;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    color: #dde1f0 !important;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    font-family: 'Syne', sans-serif;
+  }
+  .input-dark:focus {
+    border-color: rgba(79,142,247,0.6);
+    box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
+  }
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.pulse-dot { animation: pulse-dot 2.2s ease-in-out infinite; }
