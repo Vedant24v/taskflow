@@ -2,11 +2,8 @@
 
 A modern, production-grade task management application built with React, featuring drag-and-drop, smooth animations, and a clean dark UI.
 
-![TaskFlow Preview](https://via.placeholder.com/900x500/0a0a0f/4f8ef7?text=TaskFlow+Kanban+Board)
-
 ## 🚀 Live Demo
-
-> _Add your Vercel URL here after deployment_
+https://taskkfloww.vercel.app/
 
 ## ✨ Features
 
