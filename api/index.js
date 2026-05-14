@@ -1,3 +1,4 @@
-import app from '../server/server.js';
+// Vercel serverless entrypoint — CommonJS to match server.js
+const app = require('../server/server');
 
-export default app;
+module.exports = app;
