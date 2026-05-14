@@ -1,125 +1,123 @@
-# TaskFlow — Jira-like Kanban Board
+# TaskFlow
 
-A modern, production-grade task management application built with React, featuring drag-and-drop, smooth animations, and a clean dark UI.
+A full-stack Kanban board for managing tasks and teams — built with React, Node.js, Express, and MongoDB.
 
-## 🚀 Live Demo
-https://taskkfloww.vercel.app/
-
-## ✨ Features
-
-- **Kanban Board** — 3 columns: Not Started, In Progress, Completed
-- **Drag & Drop** — Move and reorder tasks across columns with smooth animations
-- **Full CRUD** — Create, view, edit, and delete tasks with form validation
-- **User Assignment** — Assign tasks to 5 mock team members with color-coded avatars
-- **Priority System** — High / Medium / Low with live status indicators
-- **Deadline Tracking** — Overdue, Urgent, Warning, and OK states with color signals
-- **Filters** — Filter by assignee, priority, or search by title — all reactive
-- **Animations** — Framer Motion card entrances, modal spring transitions, filter panel slide
-- **Responsive** — Works on tablet and desktop
-
-## 🛠 Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Framework | React 18 |
-| Build Tool | Vite |
-| Styling | Tailwind CSS |
-| Drag & Drop | @dnd-kit/core + @dnd-kit/sortable |
-| Animations | Framer Motion |
-| State | React Context + useReducer |
-| Icons | Lucide React |
-| Date Handling | date-fns |
-
-## 📁 Project Structure
-
-```
-taskflow/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   ├── Avatar.jsx        # User avatar with initials
-│   │   ├── Header.jsx        # Top nav, search, filters, stats
-│   │   ├── KanbanBoard.jsx   # DnD context + board layout
-│   │   ├── KanbanColumn.jsx  # Droppable column with task list
-│   │   ├── TaskCard.jsx      # Sortable task card
-│   │   └── TaskModal.jsx     # Create / Edit / View modal
-│   ├── context/
-│   │   └── TaskContext.jsx   # Global state (useReducer)
-│   ├── data/
-│   │   └── mockData.js       # Mock users, columns, initial tasks
-│   ├── utils/
-│   │   └── helpers.js        # Date formatting, priority/tag colors
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── index.css
-├── index.html
-├── vite.config.js
-├── tailwind.config.js
-├── vercel.json
-└── package.json
-```
-
-## ⚙️ Setup & Run Locally
-
-```bash
-# 1. Install dependencies
-npm install
-
-# 2. Start dev server
-npm run dev
-
-# 3. Open in browser
-# http://localhost:5173
-```
-
-## 📦 Build for Production
-
-```bash
-npm run build
-```
-
-Output is in the `dist/` folder.
-
-## 🔧 Production Deployment
-
-This repo is split into a frontend and backend:
-
-- Frontend: root project built by Vite
-- Backend: `server/` Node API
-
-### Frontend on Vercel
-
-1. Push this repo to GitHub
-2. Create a Vercel project from the repo root
-3. Set the environment variable:
-
-```env
-VITE_API_URL=https://<your-backend-url>
-```
-
-4. Deploy the frontend project
-
-### Backend deployment options
-
-For a production backend, deploy the `server/` folder as a separate Vercel project or another Node host.
-
-If using Vercel for the backend, use the `server/vercel.json` configuration and set these environment variables:
-
-```env
-MONGO_URI=<your-mongodb-connection-string>
-JWT_SECRET=<your-jwt-secret>
-PORT=5000
-```
-
-If Atlas SRV fails from your network, use the standard connection string from Atlas instead of `mongodb+srv://`. The standard string includes direct shard hosts and replica set options.
-
-### Notes
-
-- Do not use `mongodb://127.0.0.1:27017/...` in production
-- Use MongoDB Atlas or another hosted MongoDB provider
-- Keep `.env` files out of GitHub; use Vercel environment variables instead
+🔗 **Live Demo:** [taskkfloww.vercel.app](https://taskkfloww.vercel.app)
 
 ---
 
-Built as part of the JMD Solutions & Beyond Frontend Assessment.
+## Features
+
+- 🔐 JWT-based authentication (register & login)
+- 📋 Kanban board with drag-and-drop (Not Started → In Progress → Completed)
+- ✅ Create, edit, delete tasks with priority, deadline, and assignee
+- 👥 Team member management
+- 🔒 Data isolation — each user sees only their own tasks and team
+- ☁️ Deployed on Vercel (frontend + serverless API)
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, Vite, Tailwind CSS, Framer Motion |
+| Backend | Node.js, Express |
+| Database | MongoDB Atlas (Mongoose) |
+| Auth | JWT (jsonwebtoken + bcryptjs) |
+| Drag & Drop | @dnd-kit |
+| Deployment | Vercel |
+
+---
+
+## Local Development
+
+### Prerequisites
+- Node.js 18+
+- A MongoDB Atlas connection string (or local MongoDB)
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/Vedant24v/taskflow.git
+cd taskflow
+```
+
+### 2. Install dependencies
+```bash
+# Root (frontend + backend deps)
+npm install
+
+# Server
+cd server && npm install
+```
+
+### 3. Set up environment variables
+
+Create `.env` in the root:
+```env
+VITE_API_URL=
+```
+
+Create `.env` in the `server/` folder:
+```env
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/taskflow
+JWT_SECRET=your_secret_key
+PORT=5000
+```
+
+### 4. Run the app
+
+Open **two terminals**:
+
+```bash
+# Terminal 1 — Backend
+node server/server.js
+
+# Terminal 2 — Frontend
+node node_modules/vite/bin/vite.js
+```
+
+Visit `http://localhost:5173`
+
+---
+
+## Deploying to Vercel
+
+1. Push code to GitHub
+2. Import the repo on [vercel.com](https://vercel.com)
+3. Add these **Environment Variables** in Vercel dashboard:
+
+| Key | Value |
+|---|---|
+| `MONGO_URI` | Your MongoDB Atlas connection string |
+| `JWT_SECRET` | A secure random string |
+
+4. Deploy — Vercel auto-detects Vite and builds the frontend. The `api/index.js` file becomes a serverless function.
+
+---
+
+## Project Structure
+
+```
+taskflow/
+├── api/
+│   └── index.js          # Vercel serverless entrypoint
+├── server/
+│   ├── models/           # Mongoose schemas (User, Task)
+│   ├── routes/           # Express routes (auth, tasks, users)
+│   ├── middleware/       # JWT auth middleware
+│   └── server.js         # Express app
+├── src/
+│   ├── components/       # React components
+│   ├── context/          # TaskContext (state management)
+│   ├── pages/            # Auth, Dashboard
+│   └── App.jsx
+├── vercel.json           # Vercel routing config
+└── vite.config.js
+```
+
+---
+
+## License
+
+MIT
