@@ -1,38 +1,52 @@
-import React from 'react'
-import { TaskProvider } from './context/TaskContext'
-import Header from './components/Header'
-import KanbanBoard from './components/KanbanBoard'
-import TaskModal from './components/TaskModal'
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Auth from './pages/Auth';
+import Dashboard from './pages/Dashboard';
+import axios from 'axios';
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+axios.defaults.baseURL = apiBaseUrl;
+
+// Add a request interceptor to include token
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export default function App() {
+  const [token, setToken] = useState(localStorage.getItem('token'));
+
+  useEffect(() => {
+    // Basic verification on mount if we have a token
+    if (token) {
+      axios.get('/api/auth/me').catch(() => {
+        handleLogout();
+      });
+    }
+  }, [token]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+  };
+
   return (
-    <TaskProvider>
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: '#0d0d14', position: 'relative' }}>
-        {/* Ambient blobs */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-          <div style={{
-            position: 'absolute', width: 700, height: 700,
-            top: -300, left: -150, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(79,142,247,0.07), transparent 65%)',
-            filter: 'blur(40px)',
-          }} />
-          <div style={{
-            position: 'absolute', width: 500, height: 500,
-            bottom: -200, right: 100, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(167,139,250,0.06), transparent 65%)',
-            filter: 'blur(40px)',
-          }} />
-        </div>
-
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-          <Header />
-          <main style={{ flex: 1, overflow: 'hidden' }}>
-            <KanbanBoard />
-          </main>
-        </div>
-
-        <TaskModal />
-      </div>
-    </TaskProvider>
-  )
+    <Router>
+      <Routes>
+        <Route 
+          path="/" 
+          element={!token ? <Auth setToken={setToken} /> : <Navigate to="/dashboard" />} 
+        />
+        <Route 
+          path="/dashboard" 
+          element={token ? <Dashboard handleLogout={handleLogout} /> : <Navigate to="/" />} 
+        />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
+  );
 }

@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react'
-import { v4 as uuidv4 } from 'uuid'
-import { INITIAL_TASKS, COLUMNS } from '../data/mockData'
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useState } from 'react'
+import axios from 'axios'
+import { COLUMNS, PRIORITIES } from '../data/mockData'
 
 const TaskContext = createContext(null)
 
 const initialState = {
-  tasks: INITIAL_TASKS,
+  tasks: [],
   columns: COLUMNS,
   filter: { assignee: 'all', priority: 'all', search: '' },
   activeModal: null, // null | 'create' | { type: 'edit', task } | { type: 'view', task }
@@ -13,38 +13,32 @@ const initialState = {
 
 function reducer(state, action) {
   switch (action.type) {
+    case 'SET_TASKS': {
+      return { ...state, tasks: action.payload }
+    }
     case 'CREATE_TASK': {
-      const task = { ...action.payload, id: uuidv4(), createdAt: new Date().toISOString() }
-      return { ...state, tasks: [...state.tasks, task] }
+      return { ...state, tasks: [...state.tasks, action.payload] }
     }
     case 'UPDATE_TASK': {
       return {
         ...state,
-        tasks: state.tasks.map(t => t.id === action.payload.id ? { ...t, ...action.payload } : t),
+        tasks: state.tasks.map(t => (t.id || t._id) === (action.payload.id || action.payload._id) ? action.payload : t),
       }
     }
     case 'DELETE_TASK': {
-      return { ...state, tasks: state.tasks.filter(t => t.id !== action.payload) }
+      return { ...state, tasks: state.tasks.filter(t => (t.id || t._id) !== action.payload) }
     }
-    case 'MOVE_TASK': {
-      // Move task to new column (and optionally new index)
-      const { taskId, newStatus, overTaskId } = action.payload
-      let tasks = state.tasks.map(t =>
-        t.id === taskId ? { ...t, status: newStatus } : t
-      )
-      if (overTaskId && overTaskId !== taskId) {
-        const fromIdx = tasks.findIndex(t => t.id === taskId)
-        const toIdx = tasks.findIndex(t => t.id === overTaskId)
-        const moved = tasks.splice(fromIdx, 1)[0]
-        tasks.splice(toIdx, 0, moved)
+    case 'OPTIMISTIC_UPDATE': {
+      // For immediate UI update during drag & drop
+      return {
+        ...state,
+        tasks: state.tasks.map(t => (t.id || t._id) === action.payload.id ? { ...t, ...action.payload.changes } : t),
       }
-      return { ...state, tasks }
     }
     case 'REORDER_TASKS': {
-      // Reorder within same column
       const { activeId, overId } = action.payload
-      const fromIdx = state.tasks.findIndex(t => t.id === activeId)
-      const toIdx = state.tasks.findIndex(t => t.id === overId)
+      const fromIdx = state.tasks.findIndex(t => (t.id || t._id) === activeId)
+      const toIdx = state.tasks.findIndex(t => (t.id || t._id) === overId)
       const tasks = [...state.tasks]
       const [moved] = tasks.splice(fromIdx, 1)
       tasks.splice(toIdx, 0, moved)
@@ -66,31 +60,146 @@ function reducer(state, action) {
 
 export function TaskProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const createTask = useCallback((data) => dispatch({ type: 'CREATE_TASK', payload: data }), [])
-  const updateTask = useCallback((data) => dispatch({ type: 'UPDATE_TASK', payload: data }), [])
-  const deleteTask = useCallback((id) => dispatch({ type: 'DELETE_TASK', payload: id }), [])
-  const moveTask   = useCallback((payload) => dispatch({ type: 'MOVE_TASK', payload }), [])
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [tasksRes, usersRes] = await Promise.all([
+          axios.get('/api/tasks'),
+          axios.get('/api/users')
+        ])
+        dispatch({ type: 'SET_TASKS', payload: tasksRes.data })
+        setUsers(usersRes.data.map(u => ({ ...u, id: u.id || u._id })))
+      } catch (err) {
+        console.error('Error fetching data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const createTask = useCallback(async (data) => {
+    try {
+      const res = await axios.post('/api/tasks', data)
+      dispatch({ type: 'CREATE_TASK', payload: res.data })
+    } catch (err) {
+      console.error(err)
+    }
+  }, [])
+
+  const updateTask = useCallback(async (data) => {
+    try {
+      const { id, ...rest } = data
+      const res = await axios.put(`/api/tasks/${id}`, rest)
+      dispatch({ type: 'UPDATE_TASK', payload: res.data })
+    } catch (err) {
+      console.error(err)
+    }
+  }, [])
+
+  const deleteTask = useCallback(async (id) => {
+    try {
+      await axios.delete(`/api/tasks/${id}`)
+      dispatch({ type: 'DELETE_TASK', payload: id })
+    } catch (err) {
+      console.error(err)
+    }
+  }, [])
+
+  const moveTask = useCallback(async (payload) => {
+    const { taskId, newStatus, overTaskId } = payload
+    
+    // Optimistic UI Update
+    dispatch({ type: 'OPTIMISTIC_UPDATE', payload: { id: taskId, changes: { status: newStatus } } })
+    
+    if (overTaskId && overTaskId !== taskId) {
+      dispatch({ type: 'REORDER_TASKS', payload: { activeId: taskId, overId: overTaskId } })
+    }
+
+    // Backend update
+    try {
+      const task = state.tasks.find(t => (t.id || t._id) === taskId)
+      if (task.status !== newStatus) {
+        await axios.put(`/api/tasks/${taskId}`, { status: newStatus })
+      }
+    } catch (err) {
+      console.error(err)
+      // Re-fetch tasks if optimistic update fails
+      const res = await axios.get('/api/tasks')
+      dispatch({ type: 'SET_TASKS', payload: res.data })
+    }
+  }, [state.tasks])
+
+
   const reorderTasks = useCallback((payload) => dispatch({ type: 'REORDER_TASKS', payload }), [])
+
+  const addUser = useCallback(async (data) => {
+    try {
+      const res = await axios.post('/api/users', data)
+      const user = { ...res.data, id: res.data.id || res.data._id }
+      setUsers(prev => [...prev, user])
+      return user
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
+  }, [])
+
+  const deleteUser = useCallback(async (userId) => {
+    try {
+      await axios.delete(`/api/users/${userId}`)
+      setUsers(prev => prev.filter(u => (u.id || u._id) !== userId))
+      // Update local tasks to remove assigneeId
+      dispatch({ 
+        type: 'SET_TASKS', 
+        payload: state.tasks.map(t => 
+          (t.assigneeId?._id === userId || t.assigneeId?.id === userId || t.assigneeId === userId) 
+            ? { ...t, assigneeId: null } 
+            : t
+        )
+      })
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
+  }, [state.tasks])
+
   const setFilter  = useCallback((payload) => dispatch({ type: 'SET_FILTER', payload }), [])
   const openModal  = useCallback((payload) => dispatch({ type: 'OPEN_MODAL', payload }), [])
   const closeModal = useCallback(() => dispatch({ type: 'CLOSE_MODAL' }), [])
 
   const filteredTasks = state.tasks.filter(t => {
     const { assignee, priority, search } = state.filter
-    if (assignee !== 'all' && t.assigneeId !== assignee) return false
+    if (assignee !== 'all' && (t.assigneeId?._id || t.assigneeId?.id || t.assigneeId) !== assignee) return false
     if (priority !== 'all' && t.priority !== priority) return false
     if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
   return (
-    <TaskContext.Provider value={{
-      ...state,
-      filteredTasks,
-      createTask, updateTask, deleteTask, moveTask, reorderTasks,
-      setFilter, openModal, closeModal,
-    }}>
+    <TaskContext.Provider
+      value={{
+        tasks: state.tasks,
+        filteredTasks,
+        users,
+        addUser,
+        deleteUser,
+        loading,
+        filter: state.filter,
+        setFilter,
+        moveTask,
+        reorderTasks,
+        createTask,
+        updateTask,
+        deleteTask,
+        activeModal: state.activeModal,
+        openModal,
+        closeModal,
+      }}
+    >
       {children}
     </TaskContext.Provider>
   )

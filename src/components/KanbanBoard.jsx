@@ -6,13 +6,13 @@ import { useTasks } from '../context/TaskContext'
 import { COLUMNS } from '../data/mockData'
 
 export default function KanbanBoard() {
-  const { filteredTasks, tasks, moveTask, reorderTasks } = useTasks()
+  const { filteredTasks, tasks, moveTask, reorderTasks, loading } = useTasks()
   const [activeTask, setActiveTask] = useState(null)
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
   function onDragStart({ active }) {
-    setActiveTask(tasks.find(t => t.id === active.id) || null)
+    setActiveTask(tasks.find(t => t.id === active.id || t._id === active.id) || null)
   }
 
   function onDragOver({ active, over }) {
@@ -23,13 +23,13 @@ export default function KanbanBoard() {
 
     const isOverColumn = COLUMNS.some(c => c.id === overId)
     if (isOverColumn) {
-      const t = tasks.find(t => t.id === activeId)
+      const t = tasks.find(t => t.id === activeId || t._id === activeId)
       if (t && t.status !== overId) moveTask({ taskId: activeId, newStatus: overId })
       return
     }
 
-    const overTask   = tasks.find(t => t.id === overId)
-    const activeTaskObj = tasks.find(t => t.id === activeId)
+    const overTask   = tasks.find(t => t.id === overId || t._id === overId)
+    const activeTaskObj = tasks.find(t => t.id === activeId || t._id === activeId)
     if (!overTask || !activeTaskObj) return
 
     if (activeTaskObj.status !== overTask.status) {
@@ -44,15 +44,23 @@ export default function KanbanBoard() {
     if (!over) return
     const isOverColumn = COLUMNS.some(c => c.id === over.id)
     if (isOverColumn) {
-      const t = tasks.find(t => t.id === active.id)
+      const t = tasks.find(t => t.id === active.id || t._id === active.id)
       if (t && t.status !== over.id) moveTask({ taskId: active.id, newStatus: over.id })
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-500 font-medium">
+        Loading tasks...
+      </div>
+    )
   }
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners}
       onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
-      <div style={{ display: 'flex', gap: 20, padding: '24px 28px', overflowX: 'auto', height: '100%', paddingBottom: 32, alignItems: 'flex-start' }}>
+      <div className="flex gap-6 p-8 overflow-x-auto h-full pb-10 items-start custom-scrollbar">
         {COLUMNS.map(column => (
           <KanbanColumn
             key={column.id}
@@ -64,7 +72,7 @@ export default function KanbanBoard() {
 
       <DragOverlay>
         {activeTask && (
-          <div style={{ transform: 'rotate(1.5deg)', filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.7))' }}>
+          <div className="rotate-2 opacity-90 shadow-2xl cursor-grabbing">
             <TaskCard task={activeTask} />
           </div>
         )}

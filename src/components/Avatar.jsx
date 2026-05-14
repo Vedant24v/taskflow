@@ -1,8 +1,11 @@
 import React from 'react'
-import { USERS } from '../data/mockData'
+import { useTasks } from '../context/TaskContext'
 
-export default function Avatar({ userId, size = 'sm', showName = false, showRole = false }) {
-  const user = USERS.find(u => u.id === userId)
+export default function Avatar({ userObj, userId, size = 'sm', showName = false, showRole = false }) {
+  const { users } = useTasks()
+  
+  const isPopulated = userObj && typeof userObj === 'object' && userObj.name;
+  const user = isPopulated ? userObj : users.find(u => u.id === userId || u._id === userId)
   if (!user) return null
 
   const sizeMap = {
@@ -16,16 +19,16 @@ export default function Avatar({ userId, size = 'sm', showName = false, showRole
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`${s.box} ${s.text} rounded-full flex items-center justify-center font-semibold shrink-0 select-none ring-2 ring-black`}
-        style={{ backgroundColor: user.color + '28', color: user.color, border: `1px solid ${user.color}40` }}
+        className={`${s.box} ${s.text} rounded-full flex items-center justify-center font-medium shrink-0 select-none border-2 border-surface-1`}
+        style={{ backgroundColor: (user.color || '#4f8ef7') + '22', color: user.color || '#4f8ef7' }}
         title={user.name}
       >
-        {user.initials}
+        {user.initials || (user.name ? user.name.substring(0, 2).toUpperCase() : '??')}
       </div>
       {showName && (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white leading-none truncate">{user.name}</p>
-          {showRole && <p className="text-xs text-white/40 mt-0.5">{user.role}</p>}
+          <p className="text-sm font-medium text-gray-200 leading-none truncate">{user.name}</p>
+          {showRole && <p className="text-xs text-gray-500 mt-0.5">{user.role}</p>}
         </div>
       )}
     </div>

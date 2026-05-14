@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { LayoutGrid, Search, SlidersHorizontal, Plus, X, Zap } from 'lucide-react'
+import { Search, SlidersHorizontal, Plus, X, Layers, LogOut, Users, Settings } from 'lucide-react'
 import { useTasks } from '../context/TaskContext'
-import { USERS } from '../data/mockData'
+import TeamModal from './TeamModal'
 
-export default function Header() {
-  const { tasks, filter, setFilter, openModal } = useTasks()
+export default function Header({ handleLogout }) {
+  const { tasks, users, filter, setFilter, openModal } = useTasks()
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
   const stats = {
@@ -18,90 +19,100 @@ export default function Header() {
   const hasActiveFilter = filter.assignee !== 'all' || filter.priority !== 'all' || filter.search
 
   return (
-    <header className="shrink-0" style={{ background: '#0d0d14', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+    <header className="shrink-0 bg-surface-1 border-b border-border">
       {/* Top bar */}
-      <div className="flex items-center gap-4 px-7 py-4">
+      <div className="flex items-center gap-4 px-6 py-4">
         {/* Brand */}
         <div className="flex items-center gap-3 mr-4">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #4f8ef7, #a78bfa)' }}>
-            <Zap size={16} className="text-white" fill="white" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent-blue/10 border border-accent-blue/20">
+            <Layers size={18} className="text-accent-blue" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold text-white tracking-tight leading-none">TaskFlow</h1>
-            <p className="text-[11px] mt-0.5" style={{ color: 'rgba(221,225,240,0.35)', fontFamily: 'JetBrains Mono, monospace' }}>
-              sprint board
-            </p>
+            <h1 className="text-lg font-semibold tracking-tight text-white">TaskFlow</h1>
           </div>
         </div>
 
         {/* Search */}
-        <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ color: 'rgba(221,225,240,0.35)' }} />
+        <div className="relative flex-1 max-w-sm ml-4">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
           <input
-            className="input-dark pl-10 pr-10"
-            style={{ background: '#1a1a26', border: '1.5px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px 10px 38px', fontSize: 14, color: '#dde1f0', outline: 'none', width: '100%' }}
+            className="w-full bg-surface-2 border border-border rounded-lg pl-9 pr-8 py-2 text-sm text-gray-200 outline-none focus:border-accent-blue transition-colors"
             placeholder="Search tasks…"
             value={filter.search}
             onChange={e => setFilter({ search: e.target.value })}
           />
           {filter.search && (
             <button onClick={() => setFilter({ search: '' })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 hover:text-white transition-colors"
-              style={{ color: 'rgba(221,225,240,0.4)' }}>
-              <X size={13} />
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
+              <X size={14} />
             </button>
           )}
         </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-3 ml-auto">
           {/* Filter button */}
           <button
             onClick={() => setShowFilters(s => !s)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
-            style={showFilters || hasActiveFilter
-              ? { color: '#4f8ef7', background: 'rgba(79,142,247,0.12)', border: '1.5px solid rgba(79,142,247,0.35)' }
-              : { color: 'rgba(221,225,240,0.55)', background: '#1a1a26', border: '1.5px solid rgba(255,255,255,0.1)' }
-            }
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${showFilters || hasActiveFilter ? 'bg-accent-blue/10 border-accent-blue/30 text-accent-blue' : 'bg-surface-2 border-border text-gray-300 hover:text-white'}`}
           >
-            <SlidersHorizontal size={14} />
+            <SlidersHorizontal size={16} />
             Filter
-            {hasActiveFilter && <span className="w-2 h-2 rounded-full bg-blue-400" />}
+            {hasActiveFilter && <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />}
           </button>
 
           {/* New task */}
           <button
             onClick={() => openModal('create')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #4f8ef7, #7b6cf6)' }}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white text-surface-0 hover:bg-gray-200 transition-colors"
           >
-            <Plus size={15} />
+            <Plus size={16} />
             New Task
+          </button>
+          
+          <div className="w-px h-6 bg-border mx-1"></div>
+          
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
+            title="Log Out"
+          >
+            <LogOut size={16} />
           </button>
         </div>
       </div>
 
       {/* Stats + avatars */}
-      <div className="flex items-center gap-7 px-7 py-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <StatPill label="Total"       value={stats.total}       color="#94a3b8" />
-        <StatPill label="Not Started" value={stats.not_started} color="#64748b" />
-        <StatPill label="In Progress" value={stats.in_progress} color="#4f8ef7" />
-        <StatPill label="Done"        value={stats.completed}   color="#34d399" />
+      <div className="flex items-center gap-6 px-6 py-3 border-t border-border/50 bg-surface-0/50">
+        <StatPill label="Total"       value={stats.total}       color="#a1a1aa" />
+        <StatPill label="Not Started" value={stats.not_started} color="#71717a" />
+        <StatPill label="In Progress" value={stats.in_progress} color="#3b82f6" />
+        <StatPill label="Done"        value={stats.completed}   color="#10b981" />
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-xs mr-1" style={{ color: 'rgba(221,225,240,0.3)' }}>Team</span>
-          <div className="flex -space-x-2">
-            {USERS.map(u => (
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-gray-500 font-medium">Team</span>
+          <div className="flex -space-x-2 overflow-hidden px-1">
+            {users.slice(0, 10).map(u => (
               <div key={u.id} title={u.name}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ring-2"
-                style={{ background: u.color + '22', color: u.color, border: `1.5px solid ${u.color}50`, ringColor: '#0d0d14' }}>
-                {u.initials}
+                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-medium border-2 border-surface-1"
+                style={{ background: u.color + '33', color: u.color }}>
+                {u.initials || (u.name ? u.name.substring(0, 2).toUpperCase() : '??')}
               </div>
             ))}
+            {users.length > 10 && (
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-medium bg-surface-2 text-gray-400 border-2 border-surface-1">
+                +{users.length - 10}
+              </div>
+            )}
+            <button onClick={() => setIsTeamModalOpen(true)}
+              className="w-7 h-7 rounded-full flex items-center justify-center bg-surface-2 text-gray-400 hover:text-gray-200 hover:bg-surface-3 transition-colors border-2 border-surface-1"
+              title="Manage Team">
+              <Settings size={12} />
+            </button>
           </div>
         </div>
       </div>
+
+      <TeamModal isOpen={isTeamModalOpen} onClose={() => setIsTeamModalOpen(false)} />
 
       {/* Filter panel */}
       <motion.div
@@ -110,31 +121,30 @@ export default function Header() {
         transition={{ duration: 0.2, ease: 'easeInOut' }}
         className="overflow-hidden"
       >
-        <div className="px-7 py-4 flex flex-wrap items-center gap-3"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.015)' }}>
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(221,225,240,0.3)' }}>
+        <div className="px-6 py-4 flex flex-wrap items-center gap-3 bg-surface-2/30 border-t border-border">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">
             Assignee
           </span>
-          <FilterChip active={filter.assignee === 'all'} onClick={() => setFilter({ assignee: 'all' })} color="#94a3b8">
+          <FilterChip active={filter.assignee === 'all'} onClick={() => setFilter({ assignee: 'all' })} color="#a1a1aa">
             Everyone
           </FilterChip>
-          {USERS.map(u => (
+          {users.map(u => (
             <FilterChip key={u.id} active={filter.assignee === u.id}
               onClick={() => setFilter({ assignee: filter.assignee === u.id ? 'all' : u.id })} color={u.color}>
               {u.name.split(' ')[0]}
             </FilterChip>
           ))}
 
-          <div className="w-px h-5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          <div className="w-px h-5 mx-2 bg-border" />
 
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'rgba(221,225,240,0.3)' }}>
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">
             Priority
           </span>
           {[
-            { id: 'all',    label: 'All',    color: '#94a3b8' },
-            { id: 'high',   label: 'High',   color: '#f87171' },
-            { id: 'medium', label: 'Medium', color: '#fbbf24' },
-            { id: 'low',    label: 'Low',    color: '#64748b' },
+            { id: 'all',    label: 'All',    color: '#a1a1aa' },
+            { id: 'high',   label: 'High',   color: '#ef4444' },
+            { id: 'medium', label: 'Medium', color: '#f59e0b' },
+            { id: 'low',    label: 'Low',    color: '#3b82f6' },
           ].map(p => (
             <FilterChip key={p.id} active={filter.priority === p.id}
               onClick={() => setFilter({ priority: filter.priority === p.id ? 'all' : p.id })} color={p.color}>
@@ -145,12 +155,9 @@ export default function Header() {
           {hasActiveFilter && (
             <button
               onClick={() => setFilter({ assignee: 'all', priority: 'all', search: '' })}
-              className="ml-auto flex items-center gap-1.5 text-sm font-semibold transition-colors"
-              style={{ color: 'rgba(248,113,113,0.7)' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#f87171'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(248,113,113,0.7)'}
+              className="ml-auto flex items-center gap-1.5 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
             >
-              <X size={13} /> Clear filters
+              <X size={14} /> Clear
             </button>
           )}
         </div>
@@ -162,9 +169,9 @@ export default function Header() {
 function StatPill({ label, value, color }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-      <span className="text-sm" style={{ color: 'rgba(221,225,240,0.4)' }}>{label}</span>
-      <span className="text-sm font-bold" style={{ color, fontFamily: 'JetBrains Mono, monospace' }}>{value}</span>
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
+      <span className="text-sm text-gray-400">{label}</span>
+      <span className="text-sm font-semibold font-mono" style={{ color }}>{value}</span>
     </div>
   )
 }
@@ -172,11 +179,8 @@ function StatPill({ label, value, color }) {
 function FilterChip({ children, active, onClick, color }) {
   return (
     <button onClick={onClick}
-      className="text-sm px-3 py-1.5 rounded-full font-semibold transition-all"
-      style={active
-        ? { color, background: color + '1a', border: `1.5px solid ${color}55` }
-        : { color: 'rgba(221,225,240,0.4)', background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)' }
-      }
+      className={`text-sm px-3 py-1.5 rounded-full font-medium transition-all border ${active ? 'bg-opacity-10' : 'bg-surface-3 border-transparent text-gray-400 hover:text-white'}`}
+      style={active ? { color, background: color + '1a', borderColor: color + '40' } : {}}
     >
       {children}
     </button>

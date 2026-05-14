@@ -4,39 +4,38 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Syne', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'], // Changed to a clean, modern font
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         surface: {
-          0: '#0a0a0f',
-          1: '#111118',
-          2: '#18181f',
-          3: '#1e1e28',
-          4: '#252530',
+          0: '#09090b', // zinc-950
+          1: '#18181b', // zinc-900
+          2: '#27272a', // zinc-800
+          3: '#3f3f46', // zinc-700
+          4: '#52525b', // zinc-600
         },
         accent: {
-          blue:   '#4f8ef7',
-          violet: '#a78bfa',
-          amber:  '#fbbf24',
-          green:  '#34d399',
-          red:    '#f87171',
-          cyan:   '#22d3ee',
+          blue:   '#3b82f6', // Clean blue accent
+          violet: '#8b5cf6',
+          amber:  '#f59e0b',
+          green:  '#10b981',
+          red:    '#ef4444',
+          cyan:   '#06b6d4',
         },
-        border: 'rgba(255,255,255,0.07)',
+        border: 'rgba(255,255,255,0.08)',
       },
       boxShadow: {
-        card: '0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
-        glow: '0 0 20px rgba(79,142,247,0.15)',
-        'glow-sm': '0 0 10px rgba(79,142,247,0.1)',
+        // Removed glowing shadows for a cleaner minimalist aesthetic
+        card: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.3s ease',
-        'slide-up': 'slideUp 0.3s ease',
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'slide-up': 'slideUp 0.2s ease-out',
       },
       keyframes: {
         fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
-        slideUp: { from: { opacity: 0, transform: 'translateY(8px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+        slideUp: { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
       },
     },
   },

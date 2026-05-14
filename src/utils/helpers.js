@@ -2,22 +2,25 @@ import { format, isPast, isToday, isTomorrow, differenceInDays } from 'date-fns'
 
 export function formatDeadline(dateStr) {
   if (!dateStr) return null
-  const date = new Date(dateStr + 'T00:00:00')
+  // If it's a full ISO string, just use it, otherwise append time for local parsing
+  const date = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00')
+  if (isNaN(date.getTime())) return null; // Handle Invalid Date
   if (isToday(date)) return 'Due today'
   if (isTomorrow(date)) return 'Due tomorrow'
   if (isPast(date)) return `Overdue ${format(date, 'MMM d')}`
   const diff = differenceInDays(date, new Date())
-  if (diff <= 7) return `${diff}d left`
+  if (diff <= 7 && diff >= 0) return `${diff}d left`
   return format(date, 'MMM d')
 }
 
 export function getDeadlineStatus(dateStr) {
   if (!dateStr) return 'none'
-  const date = new Date(dateStr + 'T00:00:00')
+  const date = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00')
+  if (isNaN(date.getTime())) return 'none'; // Handle Invalid Date
   if (isPast(date) && !isToday(date)) return 'overdue'
   if (isToday(date) || isTomorrow(date)) return 'urgent'
   const diff = differenceInDays(date, new Date())
-  if (diff <= 5) return 'warning'
+  if (diff <= 5 && diff >= 0) return 'warning'
   return 'ok'
 }
 
