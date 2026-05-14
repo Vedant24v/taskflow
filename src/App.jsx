@@ -4,7 +4,7 @@ import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import axios from 'axios';
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || '/api';
+const apiBaseUrl = import.meta.env.VITE_API_URL || '';
 axios.defaults.baseURL = apiBaseUrl;
 
 // Add a request interceptor to include token
