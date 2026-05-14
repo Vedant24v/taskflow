@@ -1,4 +1,11 @@
 node_modules
 dist
 .env
+server/.env
 .DS_Store
+# Test/scratch files — never commit these
+test-*.js
+test-*.cjs
+server/connect-test.js
+server/test.js
+server/seed.js
