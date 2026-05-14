@@ -22,6 +22,9 @@ const startServer = async () => {
     let mongoUri = process.env.MONGO_URI;
 
     if (!mongoUri) {
+      if (isVercel) {
+        throw new Error('MONGO_URI environment variable is missing in Vercel settings!');
+      }
       console.log('No MONGO_URI provided. Starting in-memory MongoDB instance for development...');
       const mongoServer = await MongoMemoryServer.create();
       mongoUri = mongoServer.getUri();
@@ -48,8 +51,10 @@ const startServer = async () => {
       console.log('Vercel environment detected, serverless function ready');
     }
   } catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
+    console.error('Failed to start server:', err.message);
+    if (!isVercel) {
+      process.exit(1);
+    }
   }
 };
 
