@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Search, SlidersHorizontal, Plus, X, Layers, LogOut, Users, Settings } from 'lucide-react'
+import { Search, SlidersHorizontal, Plus, X, Layers, LogOut, Users, Sparkles } from 'lucide-react'
 import { useTasks } from '../context/TaskContext'
 import TeamModal from './TeamModal'
 
@@ -10,177 +10,178 @@ export default function Header({ handleLogout }) {
   const [showFilters, setShowFilters] = useState(false)
 
   const stats = {
-    total:       tasks.length,
+    total: tasks.length,
     not_started: tasks.filter(t => t.status === 'not_started').length,
     in_progress: tasks.filter(t => t.status === 'in_progress').length,
-    completed:   tasks.filter(t => t.status === 'completed').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
   }
 
   const hasActiveFilter = filter.assignee !== 'all' || filter.priority !== 'all' || filter.search
 
   return (
-    <header className="shrink-0 bg-surface-1 border-b border-border">
-      {/* Top bar */}
-      <div className="flex items-center gap-4 px-6 py-4">
-        {/* Brand */}
-        <div className="flex items-center gap-3 mr-4">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-accent-blue/10 border border-accent-blue/20">
-            <Layers size={18} className="text-accent-blue" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight text-white">TaskFlow</h1>
-          </div>
-        </div>
-
-        {/* Search */}
-        <div className="relative flex-1 max-w-sm ml-4">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-          <input
-            className="w-full bg-surface-2 border border-border rounded-lg pl-9 pr-8 py-2 text-sm text-gray-200 outline-none focus:border-accent-blue transition-colors"
-            placeholder="Search tasks…"
-            value={filter.search}
-            onChange={e => setFilter({ search: e.target.value })}
-          />
-          {filter.search && (
-            <button onClick={() => setFilter({ search: '' })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors">
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 ml-auto">
-          {/* Filter button */}
-          <button
-            onClick={() => setShowFilters(s => !s)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${showFilters || hasActiveFilter ? 'bg-accent-blue/10 border-accent-blue/30 text-accent-blue' : 'bg-surface-2 border-border text-gray-300 hover:text-white'}`}
-          >
-            <SlidersHorizontal size={16} />
-            Filter
-            {hasActiveFilter && <span className="w-1.5 h-1.5 rounded-full bg-accent-blue" />}
-          </button>
-
-          {/* New task */}
-          <button
-            onClick={() => openModal('create')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white text-surface-0 hover:bg-gray-200 transition-colors"
-          >
-            <Plus size={16} />
-            New Task
-          </button>
-          
-          <div className="w-px h-6 bg-border mx-1"></div>
-          
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-surface-2 transition-colors"
-            title="Log Out"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Stats + avatars */}
-      <div className="flex items-center gap-6 px-6 py-3 border-t border-border/50 bg-surface-0/50">
-        <StatPill label="Total"       value={stats.total}       color="#a1a1aa" />
-        <StatPill label="Not Started" value={stats.not_started} color="#71717a" />
-        <StatPill label="In Progress" value={stats.in_progress} color="#3b82f6" />
-        <StatPill label="Done"        value={stats.completed}   color="#10b981" />
-
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-xs text-gray-500 font-medium">Team</span>
-          <div className="flex -space-x-2 overflow-hidden px-1">
-            {users.slice(0, 10).map(u => (
-              <div key={u.id} title={u.name}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-medium border-2 border-surface-1"
-                style={{ background: u.color + '33', color: u.color }}>
-                {u.initials || (u.name ? u.name.substring(0, 2).toUpperCase() : '??')}
+    <header className="mx-auto w-full max-w-[1420px] shrink-0">
+      <div className="graphite-panel rounded-[26px] px-4 py-4 text-white sm:px-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-accent-ink shadow-lg">
+              <Layers size={21} />
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-accent-mint ring-2 ring-[#4f4c54]" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-xl font-bold tracking-tight">TaskFlow</h1>
+                <span className="hidden rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-white/70 sm:inline-flex">
+                  Live Board
+                </span>
               </div>
-            ))}
-            {users.length > 10 && (
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-medium bg-surface-2 text-gray-400 border-2 border-surface-1">
-                +{users.length - 10}
-              </div>
+              <p className="truncate text-xs font-medium text-white/48">
+                {stats.total} tasks across {users.length} teammates
+              </p>
+            </div>
+          </div>
+
+          <div className="relative min-w-[220px] flex-1 xl:max-w-xl">
+            <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/42" />
+            <input
+              className="h-12 w-full rounded-2xl border border-white/10 bg-white/[0.08] pl-11 pr-10 text-sm text-white outline-none transition focus:border-white/30 focus:bg-white/[0.13] placeholder:text-white/38"
+              placeholder="Search tasks..."
+              value={filter.search}
+              onChange={e => setFilter({ search: e.target.value })}
+            />
+            {filter.search && (
+              <button
+                onClick={() => setFilter({ search: '' })}
+                className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-white/50 transition hover:bg-white/10 hover:text-white"
+                aria-label="Clear search"
+              >
+                <X size={14} />
+              </button>
             )}
-            <button onClick={() => setIsTeamModalOpen(true)}
-              className="w-7 h-7 rounded-full flex items-center justify-center bg-surface-2 text-gray-400 hover:text-gray-200 hover:bg-surface-3 transition-colors border-2 border-surface-1"
-              title="Manage Team">
-              <Settings size={12} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+            <button
+              onClick={() => setShowFilters(s => !s)}
+              className={`flex h-11 items-center gap-2 rounded-2xl border px-3.5 text-sm font-semibold transition ${showFilters || hasActiveFilter ? 'border-accent-mint/60 bg-accent-mint/20 text-white' : 'border-white/10 bg-white/[0.08] text-white/70 hover:bg-white/[0.14] hover:text-white'}`}
+            >
+              <SlidersHorizontal size={16} />
+              Filters
+              {hasActiveFilter && <span className="h-1.5 w-1.5 rounded-full bg-accent-mint" />}
+            </button>
+
+            <button
+              onClick={() => setIsTeamModalOpen(true)}
+              className="flex h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.08] px-3.5 text-sm font-semibold text-white/70 transition hover:bg-white/[0.14] hover:text-white"
+            >
+              <Users size={16} />
+              Team
+            </button>
+
+            <button
+              onClick={() => openModal({ type: 'create' })}
+              className="flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-accent-ink shadow-lg transition hover:-translate-y-0.5 hover:bg-[#f6f1ff]"
+            >
+              <Plus size={17} />
+              New Task
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] text-white/60 transition hover:bg-white/[0.14] hover:text-white"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <LogOut size={17} />
             </button>
           </div>
         </div>
+
+        <div className="mt-4 grid gap-2 border-t border-white/10 pt-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatPill label="Total" value={stats.total} color="#ffffff" iconColor="#bda5ff" />
+          <StatPill label="Queued" value={stats.not_started} color="#d6d3df" iconColor="#94a3b8" />
+          <StatPill label="In motion" value={stats.in_progress} color="#dff7ff" iconColor="#4f8ef7" />
+          <StatPill label="Shipped" value={stats.completed} color="#dffcf4" iconColor="#62dcbf" />
+        </div>
+
+        <motion.div
+          initial={false}
+          animate={{ height: showFilters ? 'auto' : 0, opacity: showFilters ? 1 : 0 }}
+          transition={{ duration: 0.22, ease: 'easeInOut' }}
+          className="overflow-hidden"
+        >
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-3xl border border-white/10 bg-white/[0.08] p-3">
+            <span className="flex items-center gap-1.5 px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/42">
+              <Sparkles size={13} />
+              Assignee
+            </span>
+            <FilterChip active={filter.assignee === 'all'} onClick={() => setFilter({ assignee: 'all' })} color="#ffffff">
+              Everyone
+            </FilterChip>
+            {users.map(u => (
+              <FilterChip
+                key={u.id || u._id}
+                active={filter.assignee === (u.id || u._id)}
+                onClick={() => setFilter({ assignee: filter.assignee === (u.id || u._id) ? 'all' : (u.id || u._id) })}
+                color={u.color || '#8b5cf6'}
+              >
+                {u.name.split(' ')[0]}
+              </FilterChip>
+            ))}
+
+            <div className="hidden h-5 w-px bg-white/12 sm:block" />
+
+            <span className="px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-white/42">Priority</span>
+            {[
+              { id: 'all', label: 'All', color: '#ffffff' },
+              { id: 'high', label: 'High', color: '#ff6f61' },
+              { id: 'medium', label: 'Medium', color: '#f7b955' },
+              { id: 'low', label: 'Low', color: '#62dcbf' },
+            ].map(p => (
+              <FilterChip
+                key={p.id}
+                active={filter.priority === p.id}
+                onClick={() => setFilter({ priority: filter.priority === p.id ? 'all' : p.id })}
+                color={p.color}
+              >
+                {p.label}
+              </FilterChip>
+            ))}
+
+            {hasActiveFilter && (
+              <button
+                onClick={() => setFilter({ assignee: 'all', priority: 'all', search: '' })}
+                className="ml-auto flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-white/62 transition hover:bg-white/10 hover:text-white"
+              >
+                <X size={14} /> Clear
+              </button>
+            )}
+          </div>
+        </motion.div>
       </div>
 
       <TeamModal isOpen={isTeamModalOpen} onClose={() => setIsTeamModalOpen(false)} />
-
-      {/* Filter panel */}
-      <motion.div
-        initial={false}
-        animate={{ height: showFilters ? 'auto' : 0, opacity: showFilters ? 1 : 0 }}
-        transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="overflow-hidden"
-      >
-        <div className="px-6 py-4 flex flex-wrap items-center gap-3 bg-surface-2/30 border-t border-border">
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">
-            Assignee
-          </span>
-          <FilterChip active={filter.assignee === 'all'} onClick={() => setFilter({ assignee: 'all' })} color="#a1a1aa">
-            Everyone
-          </FilterChip>
-          {users.map(u => (
-            <FilterChip key={u.id} active={filter.assignee === u.id}
-              onClick={() => setFilter({ assignee: filter.assignee === u.id ? 'all' : u.id })} color={u.color}>
-              {u.name.split(' ')[0]}
-            </FilterChip>
-          ))}
-
-          <div className="w-px h-5 mx-2 bg-border" />
-
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">
-            Priority
-          </span>
-          {[
-            { id: 'all',    label: 'All',    color: '#a1a1aa' },
-            { id: 'high',   label: 'High',   color: '#ef4444' },
-            { id: 'medium', label: 'Medium', color: '#f59e0b' },
-            { id: 'low',    label: 'Low',    color: '#3b82f6' },
-          ].map(p => (
-            <FilterChip key={p.id} active={filter.priority === p.id}
-              onClick={() => setFilter({ priority: filter.priority === p.id ? 'all' : p.id })} color={p.color}>
-              {p.label}
-            </FilterChip>
-          ))}
-
-          {hasActiveFilter && (
-            <button
-              onClick={() => setFilter({ assignee: 'all', priority: 'all', search: '' })}
-              className="ml-auto flex items-center gap-1.5 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
-            >
-              <X size={14} /> Clear
-            </button>
-          )}
-        </div>
-      </motion.div>
     </header>
   )
 }
 
-function StatPill({ label, value, color }) {
+function StatPill({ label, value, color, iconColor }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />
-      <span className="text-sm text-gray-400">{label}</span>
-      <span className="text-sm font-semibold font-mono" style={{ color }}>{value}</span>
+    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.075] px-3 py-2.5">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full" style={{ background: iconColor }} />
+        <span className="text-sm font-medium text-white/58">{label}</span>
+      </div>
+      <span className="font-mono text-sm font-semibold" style={{ color }}>{value}</span>
     </div>
   )
 }
 
 function FilterChip({ children, active, onClick, color }) {
   return (
-    <button onClick={onClick}
-      className={`text-sm px-3 py-1.5 rounded-full font-medium transition-all border ${active ? 'bg-opacity-10' : 'bg-surface-3 border-transparent text-gray-400 hover:text-white'}`}
-      style={active ? { color, background: color + '1a', borderColor: color + '40' } : {}}
+    <button
+      onClick={onClick}
+      className={`h-9 rounded-full border px-3 text-sm font-semibold transition ${active ? 'bg-white text-accent-ink shadow-sm' : 'border-white/10 bg-white/[0.08] text-white/62 hover:bg-white/[0.14] hover:text-white'}`}
+      style={active ? { borderColor: color, boxShadow: `0 0 0 3px ${color}22` } : {}}
     >
       {children}
     </button>

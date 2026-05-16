@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trash2, UserPlus } from 'lucide-react'
+import { X, Trash2, UserPlus, ArrowLeft } from 'lucide-react'
 import { useTasks } from '../context/TaskContext'
 import Avatar from './Avatar'
 
@@ -22,100 +22,111 @@ export default function TeamModal({ isOpen, onClose }) {
     }
   }
 
-  if (!isOpen) return null
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-        
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-surface-1 border border-border rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
-        >
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <h2 className="text-lg font-semibold text-gray-200">Manage Team</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-300 transition-colors">
-              <X size={20} />
-            </button>
-          </div>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-[#15121b]/45 backdrop-blur-xl"
+            onClick={onClose}
+          />
 
-          <div className="p-5">
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                {error}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: 12 }}
+            className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-white/70 bg-white/90 shadow-[0_32px_90px_rgba(20,15,31,0.28)] backdrop-blur-2xl"
+          >
+            <div className="flex items-center justify-between border-b border-accent-ink/8 bg-gradient-to-r from-white via-[#f8f3ff] to-[#effdf8] px-6 py-5">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-accent-ink/38">Workspace</p>
+                <h2 className="text-xl font-bold tracking-tight text-accent-ink">{isAdding ? 'Add Member' : 'Manage Team'}</h2>
               </div>
-            )}
+              <button
+                onClick={onClose}
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-ink/5 text-accent-ink/55 transition hover:bg-accent-ink hover:text-white"
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
 
-            {!isAdding ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium text-gray-400">Current Members ({users.length})</span>
-                  <button onClick={() => setIsAdding(true)}
-                    className="flex items-center gap-1.5 text-xs font-medium bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-lg hover:bg-blue-500/20 transition-colors"
-                  >
-                    <UserPlus size={14} /> Add Member
-                  </button>
+            <div className="p-6">
+              {error && (
+                <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-600">
+                  {error}
                 </div>
-                
-                <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                  {users.map(u => (
-                    <div key={u.id || u._id} className="flex items-center justify-between p-3 rounded-lg bg-surface-2 border border-border">
-                      <div className="flex items-center gap-3">
-                        <Avatar userObj={u} userId={u.id || u._id} size="sm" />
-                        <div>
-                          <p className="text-sm font-medium text-gray-200">{u.name}</p>
-                          <p className="text-xs text-gray-500">{u.email}</p>
-                        </div>
+              )}
+
+              {!isAdding ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-accent-ink/55">Current Members ({users.length})</span>
+                    <button
+                      onClick={() => setIsAdding(true)}
+                      className="flex h-10 items-center gap-2 rounded-2xl bg-accent-ink px-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#2c2636]"
+                    >
+                      <UserPlus size={15} /> Add
+                    </button>
+                  </div>
+
+                  <div className="custom-scrollbar max-h-72 space-y-2 overflow-y-auto pr-1">
+                    {users.map(u => (
+                      <div key={u.id || u._id} className="flex items-center justify-between rounded-2xl border border-accent-ink/8 bg-accent-ink/[0.035] p-3">
+                        <Avatar userObj={u} userId={u.id || u._id} size="md" showName showRole />
+                        <button
+                          onClick={() => deleteUser(u.id || u._id)}
+                          className="flex h-10 w-10 items-center justify-center rounded-2xl text-accent-ink/38 transition hover:bg-red-50 hover:text-red-500"
+                          title="Remove user"
+                          aria-label="Remove user"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                      <button onClick={() => deleteUser(u.id || u._id)}
-                        className="text-gray-500 hover:text-red-400 p-2 rounded-md hover:bg-surface-3 transition-colors"
-                        title="Remove User"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <form onSubmit={handleAddUser} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Full Name</label>
-                  <input required type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                    className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-gray-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
-                  <input required type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})}
-                    className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-gray-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Role</label>
-                  <input required type="text" value={form.role} onChange={e => setForm({...form, role: e.target.value})} placeholder="e.g. Frontend Dev"
-                    className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-gray-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1.5">Password</label>
-                  <input required type="password" value={form.password} onChange={e => setForm({...form, password: e.target.value})}
-                    className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-gray-500" />
-                </div>
-                
-                <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setIsAdding(false)}
-                    className="flex-1 py-2 text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-surface-2 rounded-lg transition-colors">
-                    Cancel
-                  </button>
-                  <button type="submit"
-                    className="flex-1 py-2 text-sm font-medium bg-gray-200 text-surface-0 hover:bg-white rounded-lg transition-colors">
-                    Add User
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </motion.div>
-      </div>
+              ) : (
+                <form onSubmit={handleAddUser} className="space-y-4">
+                  <Field label="Full Name">
+                    <input required type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="field-input" />
+                  </Field>
+                  <Field label="Email">
+                    <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} className="field-input" />
+                  </Field>
+                  <Field label="Role">
+                    <input required type="text" value={form.role} onChange={e => setForm({ ...form, role: e.target.value })} placeholder="e.g. Frontend Dev" className="field-input" />
+                  </Field>
+                  <Field label="Password">
+                    <input required type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} className="field-input" />
+                  </Field>
+
+                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row">
+                    <button type="button" onClick={() => setIsAdding(false)} className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-accent-ink/10 bg-white text-sm font-bold text-accent-ink/60 transition hover:bg-accent-ink/5">
+                      <ArrowLeft size={15} /> Back
+                    </button>
+                    <button type="submit" className="h-12 flex-1 rounded-2xl bg-accent-ink text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#2c2636]">
+                      Add Member
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
+  )
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-accent-ink/42">{label}</label>
+      {children}
+    </div>
   )
 }

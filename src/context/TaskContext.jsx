@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
-import { COLUMNS, PRIORITIES } from '../data/mockData'
+import { COLUMNS } from '../data/mockData'
 
 const TaskContext = createContext(null)
 

@@ -11,52 +11,52 @@ export default function KanbanColumn({ column, tasks }) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="flex flex-col flex-shrink-0 w-80"
+      transition={{ duration: 0.32 }}
+      className="flex h-full w-[min(86vw,360px)] shrink-0 flex-col"
     >
-      {/* Column header */}
-      <div className="flex items-center justify-between mb-4 px-2">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full" style={{ background: column.color }} />
-          <h3 className="text-sm font-semibold text-gray-300">
-            {column.label}
-          </h3>
-          <span className="text-xs font-medium px-2 py-0.5 rounded-md bg-surface-2 text-gray-400 ml-1">
-            {tasks.length}
-          </span>
+      <div className="mb-3 flex items-center justify-between rounded-[24px] border border-white/65 bg-white/58 px-4 py-3 shadow-[0_18px_50px_rgba(39,27,67,0.09)] backdrop-blur-2xl">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full shadow-[0_0_0_5px_rgba(255,255,255,0.65)]" style={{ background: column.color }} />
+            <h3 className="truncate text-sm font-bold text-accent-ink">{column.label}</h3>
+          </div>
+          <p className="mt-0.5 text-xs font-medium text-accent-ink/45">{tasks.length} active</p>
         </div>
+
         <button
           onClick={() => openModal({ type: 'create', defaultStatus: column.id })}
-          className="w-7 h-7 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-200 hover:bg-surface-2 transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl bg-accent-ink text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-[#2c2636]"
+          title={`Add task to ${column.label}`}
+          aria-label={`Add task to ${column.label}`}
         >
-          <Plus size={16} />
+          <Plus size={17} />
         </button>
       </div>
 
-      {/* Drop zone */}
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-col gap-3 rounded-xl p-3 transition-colors ${isOver ? 'bg-surface-2/50 border border-border' : 'bg-surface-0/30 border border-transparent'}`}
-        style={{ minHeight: 150 }}
+        className={`custom-scrollbar min-h-[220px] flex-1 overflow-y-auto rounded-[28px] border p-3 transition ${isOver ? 'border-accent-violet/35 bg-white/78 shadow-soft' : 'border-white/55 bg-white/35 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-2xl'}`}
       >
         <SortableContext items={tasks.filter(Boolean).map(t => t.id || t._id)} strategy={verticalListSortingStrategy}>
-          <AnimatePresence>
-            {tasks.filter(Boolean).map(task => <TaskCard key={task.id || task._id} task={task} />)}
-          </AnimatePresence>
+          <div className="flex flex-col gap-3">
+            <AnimatePresence>
+              {tasks.filter(Boolean).map(task => <TaskCard key={task.id || task._id} task={task} />)}
+            </AnimatePresence>
+          </div>
         </SortableContext>
 
         {tasks.length === 0 && (
-          <div className="flex flex-col items-center justify-center flex-1 py-8 opacity-50">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center border border-dashed border-gray-600 mb-3">
-              <Plus size={18} className="text-gray-500" />
+          <div className="flex min-h-[180px] flex-col items-center justify-center rounded-[22px] border border-dashed border-accent-ink/14 bg-white/34 py-8 text-center">
+            <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-accent-ink shadow-sm">
+              <Plus size={18} />
             </div>
-            <p className="text-xs text-gray-500">Drop tasks here</p>
+            <p className="text-xs font-semibold text-accent-ink/42">Drop tasks here</p>
           </div>
         )}
       </div>
-    </motion.div>
+    </motion.section>
   )
 }

@@ -19,16 +19,16 @@ export default function Avatar({ userObj, userId, size = 'sm', showName = false,
   return (
     <div className="flex items-center gap-2">
       <div
-        className={`${s.box} ${s.text} rounded-full flex items-center justify-center font-medium shrink-0 select-none border-2 border-surface-1`}
-        style={{ backgroundColor: (user.color || '#4f8ef7') + '22', color: user.color || '#4f8ef7' }}
+        className={`${s.box} ${s.text} flex shrink-0 select-none items-center justify-center rounded-full border-2 border-white font-bold shadow-sm`}
+        style={{ backgroundColor: (user.color || '#4f8ef7') + '20', color: user.color || '#4f8ef7' }}
         title={user.name}
       >
         {user.initials || (user.name ? user.name.substring(0, 2).toUpperCase() : '??')}
       </div>
       {showName && (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-200 leading-none truncate">{user.name}</p>
-          {showRole && <p className="text-xs text-gray-500 mt-0.5">{user.role}</p>}
+          <p className="truncate text-sm font-bold leading-none text-accent-ink">{user.name}</p>
+          {showRole && <p className="mt-0.5 text-xs font-medium text-accent-ink/42">{user.role}</p>}
         </div>
       )}
     </div>

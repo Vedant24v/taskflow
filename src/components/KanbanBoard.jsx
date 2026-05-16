@@ -51,7 +51,7 @@ export default function KanbanBoard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500 font-medium">
+      <div className="flex h-full items-center justify-center text-sm font-semibold text-accent-ink/45">
         Loading tasks...
       </div>
     )
@@ -60,7 +60,7 @@ export default function KanbanBoard() {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners}
       onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
-      <div className="flex gap-6 p-8 overflow-x-auto h-full pb-10 items-start custom-scrollbar">
+      <div className="custom-scrollbar flex h-full items-start gap-5 overflow-x-auto px-1 pb-8 pt-5 sm:px-0 lg:gap-6">
         {COLUMNS.map(column => (
           <KanbanColumn
             key={column.id}
@@ -72,7 +72,7 @@ export default function KanbanBoard() {
 
       <DragOverlay>
         {activeTask && (
-          <div className="rotate-2 opacity-90 shadow-2xl cursor-grabbing">
+          <div className="rotate-2 cursor-grabbing opacity-95 shadow-2xl">
             <TaskCard task={activeTask} />
           </div>
         )}
