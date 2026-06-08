@@ -18,9 +18,14 @@ export default function Auth({ setToken }) {
     setError('')
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register'
+    const payload = {
+      ...formData,
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+    }
 
     try {
-      const { data } = await axios.post(endpoint, formData)
+      const { data } = await axios.post(endpoint, payload)
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       setToken(data.token)

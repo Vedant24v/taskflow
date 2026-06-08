@@ -4,12 +4,31 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function findUserByEmail(email) {
+  const normalizedEmail = normalizeEmail(email);
+  if (!normalizedEmail) return null;
+
+  return User.findOne({
+    email: { $regex: `^${escapeRegExp(normalizedEmail)}$`, $options: 'i' }
+  });
+}
+
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { password } = req.body;
+  const name = String(req.body.name || '').trim();
+  const email = normalizeEmail(req.body.email);
   
   try {
-    let user = await User.findOne({ email });
+    let user = await findUserByEmail(email);
     if (user) {
       return res.status(400).json({ message: 'User already exists' });
     }
@@ -46,10 +65,11 @@ router.post('/register', async (req, res) => {
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = normalizeEmail(req.body.email);
   
   try {
-    let user = await User.findOne({ email });
+    let user = await findUserByEmail(email);
     if (!user) {
       return res.status(400).json({ message: 'Invalid Credentials' });
     }
